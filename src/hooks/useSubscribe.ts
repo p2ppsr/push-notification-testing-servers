@@ -85,12 +85,11 @@ export const useSubscribe = ({ publicKey }: SubscribeProps) => {
       console.log("BAD:", existingSubscription)
 
 
-    /*
+    
     if (existingSubscription) {
       throw { errorCode: Errors.ExistingSubscription } as ErrorObject;
     }
 
-    */
     const convertedVapidKey = urlBase64ToUint8Array(publicKey);
     return await registration.pushManager.subscribe({
       applicationServerKey: convertedVapidKey,

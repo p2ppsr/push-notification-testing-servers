@@ -20,25 +20,34 @@ webPush.setVapidDetails(
 const subscriptions = {};
 
 app.post('/subscribe', (req, res) => {
-    const {subscription, id} = req.body;
-    subscriptions[id] = subscription;
-    console.log('Subscription success!', subscription)
-    return res.status(201).json({data: {success: true}});
+    try {
+        const { subscription, id } = req.body;
+        subscriptions[id] = subscription;
+        console.log('Subscription success!', subscription)
+        return res.status(201).json({ data: { success: true } });
+    } catch (error) {
+        console.error('Error subscribing:', error)
+        return res.status(400).json({ data: { success: false } });
+    }
 });
 
 app.post('/send', (req, res) => {
-    const {message, title, id} = req.body;
+    const { message, title, id } = req.body;
     const subscription = subscriptions[id]
     const payload = JSON.stringify({ title, message });
+    console.log('Sending notification!', subscription)
+    console.log('Payload:', payload)
     webPush.sendNotification(subscription, payload).catch(error => {
-        return res.status(400).json({data: {success: false}});
+        console.error('Error sending:', error)
+        return res.status(400).json({ data: { success: false } });
     }).then((value) => {
-        return res.status(201).json({data: {success: true}});
+        console.log('Notification sent!')
+        return res.status(201).json({ data: { success: true } });
     });
 });
 
 app.get('/info', (req, res) => {
-    return res.status(200).json({data: JSON.stringify(subscriptions)});
+    return res.status(200).json({ data: JSON.stringify(subscriptions) });
 });
 
 
