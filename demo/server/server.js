@@ -22,6 +22,7 @@ const subscriptions = {};
 app.post('/subscribe', (req, res) => {
     const {subscription, id} = req.body;
     subscriptions[id] = subscription;
+    console.log('Subscription success!', subscription)
     return res.status(201).json({data: {success: true}});
 });
 
@@ -41,6 +42,6 @@ app.get('/info', (req, res) => {
 });
 
 
-app.listen(3000, () => {
-    console.log('Server started on port 3000');
+app.listen(3003, () => {
+    console.log('Server started on port 3003');
 });

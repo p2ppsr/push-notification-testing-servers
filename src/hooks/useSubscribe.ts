@@ -77,14 +77,20 @@ export const useSubscribe = ({ publicKey }: SubscribeProps) => {
     if (!registration.pushManager) {
       throw { errorCode: Errors.PushManagerUnavailable } as ErrorObject;
     }
+    console.log("registration success:", registration )
 
     const existingSubscription =
       await registration.pushManager.getSubscription();
+    
+      console.log("BAD:", existingSubscription)
 
+
+    /*
     if (existingSubscription) {
       throw { errorCode: Errors.ExistingSubscription } as ErrorObject;
     }
 
+    */
     const convertedVapidKey = urlBase64ToUint8Array(publicKey);
     return await registration.pushManager.subscribe({
       applicationServerKey: convertedVapidKey,

@@ -51,7 +51,7 @@ function App() {
         setLoadingSubscribe(true)
         try {
             const subscription = await getSubscription();
-            await axios.post('/api/subscribe', {
+            await axios.post('http://localhost:3003/subscribe', {
                 subscription: subscription,
                 id: subscribeId
             })
@@ -68,7 +68,7 @@ function App() {
         e.preventDefault();
         setLoadingPush(true)
         try {
-            await axios.post('/api/send', {
+            await axios.post('http://localhost:3003/send', {
                 message,
                 title,
                 id: pushId
