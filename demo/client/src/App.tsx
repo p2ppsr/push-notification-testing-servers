@@ -65,6 +65,7 @@ function App() {
     const [title, setTitle] = useState<string>('Hello');
     const [subscribeId, setSubscribeId] = useState<string>('');
     const [showSubscribe, setShowSubscribe] = useState<boolean>(true)
+    const [error, setError] = useState<string>('');
 
     const onShowSubscribe = () => {
         setShowSubscribe(true)
@@ -98,14 +99,14 @@ function App() {
             console.log('Subscribing')
             const subscription = await getSubscription(true);
             console.log('Subscription:', subscription)
-            await axios.post('http://localhost:3003/subscribe', {
+            await axios.post('https://db76628ada06.ngrok-free.app/subscribe', {
                 subscription: subscription,
                 id: subscribeId
             })
             toast.success('Subscribe success');
         } catch (e) {
             console.warn(e);
-            toast.error('Details console');
+            setError(JSON.stringify(e));
         } finally {
             setLoadingSubscribe(false)
         }
@@ -115,14 +116,14 @@ function App() {
         e.preventDefault();
         setLoadingPush(true)
         try {
-            await axios.post('http://localhost:3003/send', {
+            await axios.post('https://db76628ada06.ngrok-free.app/send', {
                 message,
                 title,
                 id: pushId
             })
             toast.success('Push success');
         } catch (e) {
-            toast.error('Details console');
+            setError(JSON.stringify(e));
         } finally {
             setLoadingPush(false)
         }
@@ -184,6 +185,7 @@ function App() {
                 <div>
                     <Links />
                 </div>
+                {error && <div className="error">{error}</div>}
                 <UnsubscribeButton publicKey={PUBLIC_KEY} />
             </main>
             <Toaster />
