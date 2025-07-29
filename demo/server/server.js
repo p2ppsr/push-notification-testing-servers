@@ -23,16 +23,17 @@ app.post('/subscribe', (req, res) => {
     try {
         const { subscription, id } = req.body;
         subscriptions[id] = subscription;
-        console.log('Subscription success!', subscription)
+        console.log('Subscription success!', subscription);
         return res.status(201).json({ data: { success: true } });
     } catch (error) {
-        console.error('Error subscribing:', error)
+        console.error('Error subscribing:', error);
         return res.status(400).json({ data: { success: false } });
     }
 });
 
-app.post('/send', (req, res) => {
+app.post('/send', async (req, res) => {
     try {
+        console.log('Sending notification!');
         console.log('Sending notification!')
         const { message, title, id } = req.body;
         console.log(message, title, id)
@@ -44,12 +45,23 @@ app.post('/send', (req, res) => {
         const payload = JSON.stringify({ title, message });
         console.log('Sending notification!', subscription)
         console.log('Payload:', payload)
-        webPush.sendNotification(subscription, payload)
+        await webPush.sendNotification(subscription, payload)
         console.log('Notification sent!')
         return res.status(201).json({ data: { success: true } });
     } catch (error) {
         console.error('Error sending:', error)
-        return res.status(400).json({ data: { success: false } });
+        // Handle specific web-push errors
+        if (error.statusCode === 410) {
+            // Subscription has expired or been unsubscribed
+            console.log('Subscription expired/unsubscribed, removing from storage')
+            return res.status(410).json({
+                data: {
+                    success: false,
+                    error: 'Subscription expired or unsubscribed'
+                }
+            });
+        }
+        return res.status(400).json({ data: { success: false, error: error.message } });
     }
 });
 

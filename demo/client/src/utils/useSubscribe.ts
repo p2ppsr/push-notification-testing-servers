@@ -17,7 +17,7 @@ export var Errors: any;
     Errors["Unknown"] = "Unknown";
 })(Errors || (Errors = {}));
 export const useSubscribe = ({ publicKey }: { publicKey: string }) => {
-    const getSubscription = async () => {
+    const getSubscription = async (subscribe = false) => {
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
             throw { errorCode: Errors.ServiceWorkerAndPushManagerNotSupported };
         }
@@ -31,10 +31,11 @@ export const useSubscribe = ({ publicKey }: { publicKey: string }) => {
             return existingSubscription;
         }
         const convertedVapidKey = urlBase64ToUint8Array(publicKey);
-        return await registration.pushManager.subscribe({
+        return subscribe ? await registration.pushManager.subscribe({
             applicationServerKey: convertedVapidKey,
             userVisibleOnly: true,
-        });
+        }) : existingSubscription;
     };
     return { getSubscription };
 };
+

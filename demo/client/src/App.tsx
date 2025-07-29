@@ -11,6 +11,52 @@ import { QRCode, QRSvg } from 'sexy-qr';
 // in PROD use from .env
 const PUBLIC_KEY = 'BDZJSiMXSJUhryPkjFh_H84ZeEjVNfq5STCXVDEW4bpXye1mybGCjufRFIVmMxJN1wHOGUunGyBra0qvSa0fGJ8';
 
+const UnsubscribeButton = ({ publicKey }: { publicKey: string }) => {
+    const { getSubscription } = useSubscribe({ publicKey });
+    const [isSubscribed, setIsSubscribed] = useState(false);
+
+    useEffect(() => {
+        // Check initial subscription state
+        (async () => {
+            try {
+                const sub = await getSubscription();
+                setIsSubscribed(!!sub);
+            } catch (e) {
+                console.error('Error checking subscription:', e);
+            }
+        })();
+    }, [getSubscription])
+
+    const handleUnsubscribe = async () => {
+        try {
+            console.log("Unsubscribing")
+            const sub = await getSubscription();
+            console.log("Subscription removed:", sub)
+            if (!sub) {
+                alert('No active subscription to unsubscribe.');
+                return;
+            }
+            const success = await sub.unsubscribe();
+            console.log("Subscription removed:", success)
+            if (success) {
+                alert('Unsubscribed successfully');
+                // TODO: inform your backend to delete this subscription record
+                setIsSubscribed(false);
+            } else {
+                console.warn('Unsubscribe returned false');
+            }
+        } catch (err) {
+            console.error('Unsubscription error:', err);
+            alert('Failed to unsubscribe. See console for details.');
+        }
+    };
+    return (
+        <button onClick={handleUnsubscribe}>
+            {isSubscribed ? 'Unsubscribe from Push' : 'Not Subscribed'}
+        </button>
+    )
+}
+
 function App() {
     const [loadingSubscribe, setLoadingSubscribe] = useState<boolean>(false)
     const [loadingPush, setLoadingPush] = useState<boolean>(false)
@@ -50,7 +96,7 @@ function App() {
         setLoadingSubscribe(true)
         try {
             console.log('Subscribing')
-            const subscription = await getSubscription();
+            const subscription = await getSubscription(true);
             console.log('Subscription:', subscription)
             await axios.post('http://localhost:3003/subscribe', {
                 subscription: subscription,
@@ -95,41 +141,6 @@ function App() {
             });
     }, []);
 
-
-
-    const UnsubscribeButton = ({ publicKey }: { publicKey: string }) => {
-        const { getSubscription } = useSubscribe({ publicKey });
-        const [isSubscribed, setIsSubscribed] = useState(false);
-
-        const handleUnsubscribe = async () => {
-            try {
-                console.log("Unsubscribing")
-                const sub = await getSubscription();
-                console.log("Subscription removed:", sub)
-                if (!sub) {
-                    alert('No active subscription to unsubscribe.');
-                    return;
-                }
-                const success = await sub.unsubscribe();
-                console.log("Subscription removed:", success)
-                if (success) {
-                    alert('Unsubscribed successfully');
-                    // TODO: inform your backend to delete this subscription record
-                    setIsSubscribed(false);
-                } else {
-                    console.warn('Unsubscribe returned false');
-                }
-            } catch (err) {
-                console.error('Unsubscription error:', err);
-                alert('Failed to unsubscribe. See console for details.');
-            }
-        };
-        return (
-            <button onClick={handleUnsubscribe}>
-                {isSubscribed ? 'Unsubscribe from Push' : 'Not Subscribed'}
-            </button>
-        )
-    }
     return (
         <div className="App">
             <main>

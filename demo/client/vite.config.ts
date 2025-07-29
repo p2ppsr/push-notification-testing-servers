@@ -9,6 +9,6 @@ export default defineConfig({
     outDir: 'build'
   },
   server: {
-    allowedHosts: ['.ngrok-free.app'],
+    allowedHosts: ['.ngrok-free.app']
   },
 })
