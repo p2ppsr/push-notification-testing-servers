@@ -1,8 +1,8 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './App.css';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
-import {useSubscribe} from "react-pwa-push-notifications";
-import toast, {Toaster} from 'react-hot-toast';
+import { useSubscribe } from "./utils/useSubscribe";
+import toast, { Toaster } from 'react-hot-toast';
 import TextInput from "./components/Input";
 import axios from "axios";
 import Links from "./components/Links";
@@ -27,9 +27,8 @@ function App() {
         setShowSubscribe(false)
     }
 
-
     const qrCode = useMemo(() => {
-        const qr =  new QRCode({
+        const qr = new QRCode({
             content: window.location.href,
             ecl: 'M'
         });
@@ -44,7 +43,7 @@ function App() {
         }).svg
     }, [])
 
-    const { getSubscription } = useSubscribe({publicKey: PUBLIC_KEY});
+    const { getSubscription } = useSubscribe({ publicKey: PUBLIC_KEY });
 
     const onSubmitSubscribe = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
@@ -97,6 +96,40 @@ function App() {
     }, []);
 
 
+
+    const UnsubscribeButton = ({ publicKey }: { publicKey: string }) => {
+        const { getSubscription } = useSubscribe({ publicKey });
+        const [isSubscribed, setIsSubscribed] = useState(false);
+
+        const handleUnsubscribe = async () => {
+            try {
+                console.log("Unsubscribing")
+                const sub = await getSubscription();
+                console.log("Subscription removed:", sub)
+                if (!sub) {
+                    alert('No active subscription to unsubscribe.');
+                    return;
+                }
+                const success = await sub.unsubscribe();
+                console.log("Subscription removed:", success)
+                if (success) {
+                    alert('Unsubscribed successfully');
+                    // TODO: inform your backend to delete this subscription record
+                    setIsSubscribed(false);
+                } else {
+                    console.warn('Unsubscribe returned false');
+                }
+            } catch (err) {
+                console.error('Unsubscription error:', err);
+                alert('Failed to unsubscribe. See console for details.');
+            }
+        };
+        return (
+            <button onClick={handleUnsubscribe}>
+                {isSubscribed ? 'Unsubscribe from Push' : 'Not Subscribed'}
+            </button>
+        )
+    }
     return (
         <div className="App">
             <main>
@@ -123,26 +156,28 @@ function App() {
                     <form onSubmit={onSubmitPush}>
                         <div className="title">Notification</div>
                         <TextInput id="idSubscribe" placeholder="id" value={pushId}
-                                   onChange={onChange(setPushId)}/>
-                        <TextInput id="title" placeholder="title" value={title} onChange={onChange(setTitle)}/>
-                        <TextInput id="message" placeholder="message" value={message} onChange={onChange(setMessage)}/>
-                        <button className={loadingPush ? 'loading' : ''}  type="submit">Send</button>
+                            onChange={onChange(setPushId)} />
+                        <TextInput id="title" placeholder="title" value={title} onChange={onChange(setTitle)} />
+                        <TextInput id="message" placeholder="message" value={message} onChange={onChange(setMessage)} />
+                        <button className={loadingPush ? 'loading' : ''} type="submit">Send</button>
                     </form>
                 </div>}
-                {showSubscribe &&  <div className="send">
+                {showSubscribe && <div className="send">
                     <form onSubmit={onSubmitSubscribe}>
                         <div className="title">Your Id</div>
                         <TextInput id="fingerprint" placeholder="Your id" value={subscribeId}
-                                   onChange={onChange(setSubscribeId)}/>
+                            onChange={onChange(setSubscribeId)} />
                         <button className={loadingSubscribe ? 'loading' : ''} type="submit">Send</button>
                     </form>
-                </div> }
+                </div>}
                 <div>
                     <Links />
                 </div>
+                <UnsubscribeButton publicKey={PUBLIC_KEY} />
             </main>
-            <Toaster/>
+            <Toaster />
         </div>
+
     );
 }
 
