@@ -32,18 +32,25 @@ app.post('/subscribe', (req, res) => {
 });
 
 app.post('/send', (req, res) => {
-    const { message, title, id } = req.body;
-    const subscription = subscriptions[id]
-    const payload = JSON.stringify({ title, message });
-    console.log('Sending notification!', subscription)
-    console.log('Payload:', payload)
-    webPush.sendNotification(subscription, payload).catch(error => {
-        console.error('Error sending:', error)
-        return res.status(400).json({ data: { success: false } });
-    }).then((value) => {
+    try {
+        console.log('Sending notification!')
+        const { message, title, id } = req.body;
+        console.log(message, title, id)
+        const subscription = subscriptions[id]
+        if (!subscription) {
+            console.error('No subscription found for id:', id)
+            return res.status(400).json({ data: { success: false } });
+        }
+        const payload = JSON.stringify({ title, message });
+        console.log('Sending notification!', subscription)
+        console.log('Payload:', payload)
+        webPush.sendNotification(subscription, payload)
         console.log('Notification sent!')
         return res.status(201).json({ data: { success: true } });
-    });
+    } catch (error) {
+        console.error('Error sending:', error)
+        return res.status(400).json({ data: { success: false } });
+    }
 });
 
 app.get('/info', (req, res) => {

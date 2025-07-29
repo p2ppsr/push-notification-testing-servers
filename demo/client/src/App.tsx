@@ -52,6 +52,7 @@ function App() {
         try {
             console.log('Subscribing')
             const subscription = await getSubscription();
+            console.log('Subscription:', subscription)
             await axios.post('http://localhost:3003/subscribe', {
                 subscription: subscription,
                 id: subscribeId
