@@ -1,13 +1,15 @@
-const express = require('express');
-const webPush = require('web-push');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+import express, { Request, Response } from 'express';
+import * as webPush from 'web-push';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+
+// import { sendNotification } from '/documents/metanet-webpush-sdk/dist/sendNotification';
+
 const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
 
-// DO NOT USE IN PROD
 const publicKey = 'BDZJSiMXSJUhryPkjFh_H84ZeEjVNfq5STCXVDEW4bpXye1mybGCjufRFIVmMxJN1wHOGUunGyBra0qvSa0fGJ8';
 const privateKey = 'upQsMoPu4_T6aT3a8Nwg8b7Cd3wNjQwfD5PgCYJjTmc';
 webPush.setVapidDetails(
@@ -16,10 +18,9 @@ webPush.setVapidDetails(
     privateKey
 );
 
-// Хранилище для подписок
-const subscriptions = {};
+const subscriptions: any = {};
 
-app.post('/subscribe', (req, res) => {
+app.post('/subscribe', (req: Request, res: Response) => {
     try {
         const { subscription, id } = req.body;
         subscriptions[id] = subscription;
@@ -31,7 +32,7 @@ app.post('/subscribe', (req, res) => {
     }
 });
 
-app.post('/send', async (req, res) => {
+app.post('/send', async (req: Request, res: Response) => {
     try {
         console.log('Sending notification!');
         console.log('Sending notification!')
@@ -45,10 +46,11 @@ app.post('/send', async (req, res) => {
         const payload = JSON.stringify({ title, message });
         console.log('Sending notification!', subscription)
         console.log('Payload:', payload)
+        // await webPush.sendNotification(subscription, payload)
         await webPush.sendNotification(subscription, payload)
         console.log('Notification sent!')
         return res.status(201).json({ data: { success: true } });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error sending:', error)
         // Handle specific web-push errors
         if (error.statusCode === 410) {
@@ -65,10 +67,9 @@ app.post('/send', async (req, res) => {
     }
 });
 
-app.get('/info', (req, res) => {
+app.get('/info', (req: Request, res: Response) => {
     return res.status(200).json({ data: JSON.stringify(subscriptions) });
 });
-
 
 app.listen(3003, () => {
     console.log('Server started on port 3003');

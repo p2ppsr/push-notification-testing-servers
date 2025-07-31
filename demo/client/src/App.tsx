@@ -99,7 +99,7 @@ function App() {
             console.log('Subscribing')
             const subscription = await getSubscription(true);
             console.log('Subscription:', subscription)
-            await axios.post('https://db76628ada06.ngrok-free.app/subscribe', {
+            await axios.post('https://40b7c694a704.ngrok-free.app/subscribe', {
                 subscription: subscription,
                 id: subscribeId
             })
@@ -116,7 +116,7 @@ function App() {
         e.preventDefault();
         setLoadingPush(true)
         try {
-            await axios.post('https://db76628ada06.ngrok-free.app/send', {
+            await axios.post('https://40b7c694a704.ngrok-free.app/send', {
                 message,
                 title,
                 id: pushId
